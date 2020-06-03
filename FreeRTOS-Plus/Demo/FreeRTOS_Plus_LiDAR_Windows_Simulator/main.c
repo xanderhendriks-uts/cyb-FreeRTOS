@@ -44,8 +44,7 @@
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 #include "SimpleUDPClientAndServer.h"
-#include "SimpleTCPEchoServer.h"
-#include "TCPEchoClient_SingleTasks.h"
+#include "SimpleTCPHttpServer.h"
 #include "demo_logging.h"
 
 /* Simple UDP client and server task parameters. */
@@ -53,12 +52,12 @@
 #define mainSIMPLE_UDP_CLIENT_SERVER_PORT				( 5005UL )
 
 /* Echo client task parameters - used for both TCP and UDP echo clients. */
-#define mainECHO_CLIENT_TASK_STACK_SIZE 				( configMINIMAL_STACK_SIZE * 2 )	/* Not used in the Windows port. */
-#define mainECHO_CLIENT_TASK_PRIORITY					( tskIDLE_PRIORITY + 1 )
+#define mainHTTP_CLIENT_TASK_STACK_SIZE 				( configMINIMAL_STACK_SIZE * 2 )	/* Not used in the Windows port. */
+#define mainHTTP_CLIENT_TASK_PRIORITY					( tskIDLE_PRIORITY + 1 )
 
 /* Echo server task parameters. */
-#define mainECHO_SERVER_TASK_STACK_SIZE					( configMINIMAL_STACK_SIZE * 2 )	/* Not used in the Windows port. */
-#define mainECHO_SERVER_TASK_PRIORITY					( tskIDLE_PRIORITY + 1 )
+#define mainHTTP_SERVER_TASK_STACK_SIZE					( configMINIMAL_STACK_SIZE * 2 )	/* Not used in the Windows port. */
+#define mainHTTP_SERVER_TASK_PRIORITY					( tskIDLE_PRIORITY + 1 )
 
 /* Define a name that will be used for LLMNR and NBNS searches. */
 #define mainHOST_NAME				"RTOSDemo"
@@ -76,20 +75,20 @@ As these tasks use UDP, and can therefore loose packets, they will cause
 configASSERT() to be called when they are run in a less than perfect networking
 environment.
 
-mainCREATE_TCP_ECHO_TASKS_SINGLE:  When set to 1 a set of tasks are created that
+mainCREATE_TCP_HTTP_TASKS_SINGLE:  When set to 1 a set of tasks are created that
 send TCP echo requests to the standard echo port (port 7), then wait for and
 verify the echo reply, from within the same task (Tx and Rx are performed in the
 same RTOS task).  The IP address of the echo server must be configured using the
-configECHO_SERVER_ADDR0 to configECHO_SERVER_ADDR3 constants in
+configHTTP_SERVER_ADDR0 to configHTTP_SERVER_ADDR3 constants in
 FreeRTOSConfig.h.
 
-mainCREATE_TCP_ECHO_SERVER_TASK:  When set to 1 a task is created that accepts
+mainCREATE_TCP_HTTP_SERVER_TASK:  When set to 1 a task is created that accepts
 connections on the standard echo port (port 7), then echos back any data
 received on that connection.
 */
 #define mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS	1
-#define mainCREATE_TCP_ECHO_TASKS_SINGLE			0
-#define mainCREATE_TCP_ECHO_SERVER_TASK				1
+#define mainCREATE_TCP_HTTP_TASKS_SINGLE			0
+#define mainCREATE_TCP_HTTP_SERVER_TASK				1
 /*-----------------------------------------------------------*/
 
 /*
@@ -117,7 +116,7 @@ name of the constant, or pdFALSE to not log using the method indicated by the
 name of the constant.  Options include to standard out (xLogToStdout), to a disk
 file (xLogToFile), and to a UDP port (xLogToUDP).  If xLogToUDP is set to pdTRUE
 then UDP messages are sent to the IP address configured as the echo server
-address (see the configECHO_SERVER_ADDR0 definitions in FreeRTOSConfig.h) and
+address (see the configHTTP_SERVER_ADDR0 definitions in FreeRTOSConfig.h) and
 the port number set by configPRINT_PORT in FreeRTOSConfig.h. */
 const BaseType_t xLogToStdout = pdTRUE, xLogToFile = pdFALSE, xLogToUDP = pdFALSE;
 
@@ -234,15 +233,15 @@ static BaseType_t xTasksAlreadyCreated = pdFALSE;
 			}
 			#endif /* mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS */
 
-			#if( mainCREATE_TCP_ECHO_TASKS_SINGLE == 1 )
+			#if( mainCREATE_TCP_HTTP_TASKS_SINGLE == 1 )
 			{
-				vStartTCPEchoClientTasks_SingleTasks( mainECHO_CLIENT_TASK_STACK_SIZE, mainECHO_CLIENT_TASK_PRIORITY );
+				vStartTCPEchoClientTasks_SingleTasks( mainHTTP_CLIENT_TASK_STACK_SIZE, mainHTTP_CLIENT_TASK_PRIORITY );
 			}
-			#endif /* mainCREATE_TCP_ECHO_TASKS_SINGLE */
+			#endif /* mainCREATE_TCP_HTTP_TASKS_SINGLE */
 
-			#if( mainCREATE_TCP_ECHO_SERVER_TASK == 1 )
+			#if( mainCREATE_TCP_HTTP_SERVER_TASK == 1 )
 			{
-				vStartSimpleTCPServerTasks( mainECHO_SERVER_TASK_STACK_SIZE, mainECHO_SERVER_TASK_PRIORITY );
+				vStartSimpleTCPServerTasks( mainHTTP_SERVER_TASK_STACK_SIZE, mainHTTP_SERVER_TASK_PRIORITY );
 			}
 			#endif
 
@@ -301,7 +300,7 @@ static void prvMiscInitialisation( void )
 time_t xTimeNow;
 uint32_t ulLoggingIPAddress;
 
-	ulLoggingIPAddress = FreeRTOS_inet_addr_quick( configECHO_SERVER_ADDR0, configECHO_SERVER_ADDR1, configECHO_SERVER_ADDR2, configECHO_SERVER_ADDR3 );
+	ulLoggingIPAddress = FreeRTOS_inet_addr_quick( configHTTP_SERVER_ADDR0, configHTTP_SERVER_ADDR1, configHTTP_SERVER_ADDR2, configHTTP_SERVER_ADDR3 );
 	vLoggingInit( xLogToStdout, xLogToFile, xLogToUDP, ulLoggingIPAddress, configPRINT_PORT );
 
 	/* Seed the random number generator. */

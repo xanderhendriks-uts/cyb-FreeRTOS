@@ -67,10 +67,9 @@
     1 tab == 4 spaces!
 */
 
-#ifndef SIMPLE_TCP_ECHO_SERVER_H
-#define SIMPLE_TCP_ECHO_SERVER_H
+#ifndef SIMPLE_TCP_HTTP_SERVER_H
+#define SIMPLE_TCP_HTTP_SERVER_H
 
 void vStartSimpleTCPServerTasks( uint16_t usStackSize, BaseType_t uxPriority );
-BaseType_t xAreTCPEchoServersStillRunning( void );
 
-#endif /* SIMPLE_TCP_ECHO_SERVER_H */
+#endif /* SIMPLE_TCP_HTTP_SERVER_H */

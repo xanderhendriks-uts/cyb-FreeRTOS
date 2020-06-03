@@ -68,8 +68,8 @@
 */
 
 /*
- * FreeRTOS tasks are used with FreeRTOS+TCP to create a TCP echo server on the
- * standard echo port number (7).
+ * FreeRTOS tasks are used with FreeRTOS+TCP to create a TCP HTTP server on 
+ * port number (8006).
  *
  * See the following web page for essential demo usage and configuration
  * details:
@@ -93,29 +93,29 @@
 #if( ipconfigUSE_TCP == 1 )
 
 /* The maximum time to wait for a closing socket to close. */
-#define tcpechoSHUTDOWN_DELAY	( pdMS_TO_TICKS( 5000 ) )
+#define tcphttpSHUTDOWN_DELAY	( pdMS_TO_TICKS( 5000 ) )
 
 /* The standard echo port number. */
-#define tcpechoPORT_NUMBER		7
+#define tcphttpPORT_NUMBER		8006
 
 /* If ipconfigUSE_TCP_WIN is 1 then the Tx sockets will use a buffer size set by
 ipconfigTCP_TX_BUFFER_LENGTH, and the Tx window size will be
-configECHO_SERVER_TX_WINDOW_SIZE times the buffer size.  Note
+configHTTP_SERVER_TX_WINDOW_SIZE times the buffer size.  Note
 ipconfigTCP_TX_BUFFER_LENGTH is set in FreeRTOSIPConfig.h as it is a standard TCP/IP
-stack constant, whereas configECHO_SERVER_TX_WINDOW_SIZE is set in
+stack constant, whereas configHTTP_SERVER_TX_WINDOW_SIZE is set in
 FreeRTOSConfig.h as it is a demo application constant. */
-#ifndef configECHO_SERVER_TX_WINDOW_SIZE
-	#define configECHO_SERVER_TX_WINDOW_SIZE	2
+#ifndef configHTTP_SERVER_TX_WINDOW_SIZE
+	#define configHTTP_SERVER_TX_WINDOW_SIZE	2
 #endif
 
 /* If ipconfigUSE_TCP_WIN is 1 then the Rx sockets will use a buffer size set by
 ipconfigTCP_RX_BUFFER_LENGTH, and the Rx window size will be
-configECHO_SERVER_RX_WINDOW_SIZE times the buffer size.  Note
+configHTTP_SERVER_RX_WINDOW_SIZE times the buffer size.  Note
 ipconfigTCP_RX_BUFFER_LENGTH is set in FreeRTOSIPConfig.h as it is a standard TCP/IP
-stack constant, whereas configECHO_SERVER_RX_WINDOW_SIZE is set in
+stack constant, whereas configHTTP_SERVER_RX_WINDOW_SIZE is set in
 FreeRTOSConfig.h as it is a demo application constant. */
-#ifndef configECHO_SERVER_RX_WINDOW_SIZE
-	#define configECHO_SERVER_RX_WINDOW_SIZE	2
+#ifndef configHTTP_SERVER_RX_WINDOW_SIZE
+	#define configHTTP_SERVER_RX_WINDOW_SIZE	2
 #endif
 
 /*-----------------------------------------------------------*/
@@ -163,9 +163,9 @@ const BaseType_t xBacklog = 20;
 
 	/* Fill in the buffer and window sizes that will be used by the socket. */
 	xWinProps.lTxBufSize = ipconfigTCP_TX_BUFFER_LENGTH;
-	xWinProps.lTxWinSize = configECHO_SERVER_TX_WINDOW_SIZE;
+	xWinProps.lTxWinSize = configHTTP_SERVER_TX_WINDOW_SIZE;
 	xWinProps.lRxBufSize = ipconfigTCP_RX_BUFFER_LENGTH;
-	xWinProps.lRxWinSize = configECHO_SERVER_RX_WINDOW_SIZE;
+	xWinProps.lRxWinSize = configHTTP_SERVER_RX_WINDOW_SIZE;
 #endif /* ipconfigUSE_TCP_WIN */
 
 	/* Just to prevent compiler warnings. */
@@ -187,7 +187,7 @@ const BaseType_t xBacklog = 20;
 
 	/* Bind the socket to the port that the client task will send to, then
 	listen for incoming connections. */
-	xBindAddress.sin_port = tcpechoPORT_NUMBER;
+	xBindAddress.sin_port = tcphttpPORT_NUMBER;
 	xBindAddress.sin_port = FreeRTOS_htons( xBindAddress.sin_port );
 	FreeRTOS_bind( xListeningSocket, &xBindAddress, sizeof( xBindAddress ) );
 	FreeRTOS_listen( xListeningSocket, xBacklog );
@@ -237,13 +237,20 @@ uint8_t *pucRxBuffer;
 			/* If data was received, echo it back. */
 			if( lBytes >= 0 )
 			{
+				char pucTxBuffer[1024];
 				lSent = 0;
 				lTotalSent = 0;
+				lBytes = snprintf(pucTxBuffer, sizeof(pucTxBuffer),
+					"HTTP/1.1 200 OK\r\n"
+					"Content-Type: text/html\r\n"
+					"Content-Length: %d\r\n\r\n"
+					"%s", 4, "test"
+				);
 
 				/* Call send() until all the data has been sent. */
 				while( ( lSent >= 0 ) && ( lTotalSent < lBytes ) )
 				{
-					lSent = FreeRTOS_send( xConnectedSocket, pucRxBuffer, lBytes - lTotalSent, 0 );
+					lSent = FreeRTOS_send( xConnectedSocket, pucTxBuffer, lBytes - lTotalSent, 0 );
 					lTotalSent += lSent;
 				}
 
@@ -273,7 +280,7 @@ uint8_t *pucRxBuffer;
 		{
 			break;
 		}
-	} while( ( xTaskGetTickCount() - xTimeOnShutdown ) < tcpechoSHUTDOWN_DELAY );
+	} while( ( xTaskGetTickCount() - xTimeOnShutdown ) < tcphttpSHUTDOWN_DELAY );
 
 	/* Finished with the socket, buffer, the task. */
 	vPortFree( pucRxBuffer );
