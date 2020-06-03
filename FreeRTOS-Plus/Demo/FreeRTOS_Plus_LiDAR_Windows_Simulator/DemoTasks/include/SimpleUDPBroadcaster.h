@@ -25,9 +25,9 @@
  * 1 tab == 4 spaces!
  */
 
-#ifndef SIMPLE_UDP_CLIENT_AND_SERVER_H
-#define SIMPLE_UDPCLIENT_AND_SERVER_H
+#ifndef SIMPLE_UDP_BROADCASTER_H
+#define SIMPLE_BROADCASTER_H
 
-void vStartSimpleUDPClientServerTasks( uint16_t usStackSize, uint32_t ulsPort, UBaseType_t uxPriority );
+void vStartSimpleUDPBroadcasterTask( uint16_t usStackSize, uint32_t ulsPort, UBaseType_t uxPriority );
 
-#endif /* SIMPLE_UDPCLIENT_AND_SERVER_H */
+#endif /* SIMPLE_BROADCASTER_H */

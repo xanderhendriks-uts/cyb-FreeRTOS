@@ -43,13 +43,13 @@
 /* Demo application includes. */
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
-#include "SimpleUDPClientAndServer.h"
+#include "SimpleUDPBroadcaster.h"
 #include "SimpleTCPHttpServer.h"
 #include "demo_logging.h"
 
 /* Simple UDP client and server task parameters. */
-#define mainSIMPLE_UDP_CLIENT_SERVER_TASK_PRIORITY		( tskIDLE_PRIORITY )
-#define mainSIMPLE_UDP_CLIENT_SERVER_PORT				( 5005UL )
+#define mainSIMPLE_UDP_BROADCASTER_TASK_PRIORITY		( tskIDLE_PRIORITY )
+#define mainSIMPLE_UDP_BROADCASTER_PORT				( 5044UL )
 
 /* Echo client task parameters - used for both TCP and UDP echo clients. */
 #define mainHTTP_CLIENT_TASK_STACK_SIZE 				( configMINIMAL_STACK_SIZE * 2 )	/* Not used in the Windows port. */
@@ -66,7 +66,7 @@
 /* Set the following constants to 1 or 0 to define which tasks to include and
 exclude:
 
-mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS:  When set to 1 two UDP client tasks
+mainCREATE_SIMPLE_UDP_BROADCASTER_TASKS:  When set to 1 two UDP client tasks
 and two UDP server tasks are created.  The clients talk to the servers.  One set
 of tasks use the standard sockets interface, and the other the zero copy sockets
 interface.  These tasks are self checking and will trigger a configASSERT() if
@@ -86,8 +86,7 @@ mainCREATE_TCP_HTTP_SERVER_TASK:  When set to 1 a task is created that accepts
 connections on the standard echo port (port 7), then echos back any data
 received on that connection.
 */
-#define mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS	1
-#define mainCREATE_TCP_HTTP_TASKS_SINGLE			0
+#define mainCREATE_SIMPLE_UDP_BROADCASTER_TASKS	1
 #define mainCREATE_TCP_HTTP_SERVER_TASK				1
 /*-----------------------------------------------------------*/
 
@@ -227,21 +226,15 @@ static BaseType_t xTasksAlreadyCreated = pdFALSE;
 			/* See the comments above the definitions of these pre-processor
 			macros at the top of this file for a description of the individual
 			demo tasks. */
-			#if( mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS == 1 )
+			#if( mainCREATE_SIMPLE_UDP_BROADCASTER_TASKS == 1 )
 			{
-				vStartSimpleUDPClientServerTasks( configMINIMAL_STACK_SIZE, mainSIMPLE_UDP_CLIENT_SERVER_PORT, mainSIMPLE_UDP_CLIENT_SERVER_TASK_PRIORITY );
+				vStartSimpleUDPBroadcasterTask( configMINIMAL_STACK_SIZE, mainSIMPLE_UDP_BROADCASTER_PORT, mainSIMPLE_UDP_BROADCASTER_TASK_PRIORITY );
 			}
-			#endif /* mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS */
-
-			#if( mainCREATE_TCP_HTTP_TASKS_SINGLE == 1 )
-			{
-				vStartTCPEchoClientTasks_SingleTasks( mainHTTP_CLIENT_TASK_STACK_SIZE, mainHTTP_CLIENT_TASK_PRIORITY );
-			}
-			#endif /* mainCREATE_TCP_HTTP_TASKS_SINGLE */
+			#endif /* mainCREATE_SIMPLE_UDP_BROADCASTER_TASKS */
 
 			#if( mainCREATE_TCP_HTTP_SERVER_TASK == 1 )
 			{
-				vStartSimpleTCPServerTasks( mainHTTP_SERVER_TASK_STACK_SIZE, mainHTTP_SERVER_TASK_PRIORITY );
+				vStartSimpleTCPHttpServerTasks( mainHTTP_SERVER_TASK_STACK_SIZE, mainHTTP_SERVER_TASK_PRIORITY );
 			}
 			#endif
 

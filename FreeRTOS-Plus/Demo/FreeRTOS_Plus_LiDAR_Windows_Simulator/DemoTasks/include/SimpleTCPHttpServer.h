@@ -70,6 +70,6 @@
 #ifndef SIMPLE_TCP_HTTP_SERVER_H
 #define SIMPLE_TCP_HTTP_SERVER_H
 
-void vStartSimpleTCPServerTasks( uint16_t usStackSize, BaseType_t uxPriority );
+void vStartSimpleTCPHttpServerTasks( uint16_t usStackSize, BaseType_t uxPriority );
 
 #endif /* SIMPLE_TCP_HTTP_SERVER_H */

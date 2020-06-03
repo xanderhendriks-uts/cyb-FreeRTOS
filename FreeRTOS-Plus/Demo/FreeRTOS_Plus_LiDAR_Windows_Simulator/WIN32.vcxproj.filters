@@ -50,9 +50,6 @@
     <ClCompile Include="..\..\..\FreeRTOS\Source\tasks.c">
       <Filter>FreeRTOS\Source</Filter>
     </ClCompile>
-    <ClCompile Include="DemoTasks\SimpleUDPClientAndServer.c">
-      <Filter>DemoTasks</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\FreeRTOS-Plus-TCP\FreeRTOS_UDP_IP.c">
       <Filter>FreeRTOS+\FreeRTOS+TCP</Filter>
     </ClCompile>
@@ -95,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="demo_logging.c" />
     <ClCompile Include="DemoTasks\SimpleTCPHttpServer.c">
+      <Filter>DemoTasks</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoTasks\SimpleUDPBroadcaster.c">
       <Filter>DemoTasks</Filter>
     </ClCompile>
   </ItemGroup>

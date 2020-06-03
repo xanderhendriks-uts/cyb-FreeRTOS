@@ -96,7 +96,7 @@
 #define tcphttpSHUTDOWN_DELAY	( pdMS_TO_TICKS( 5000 ) )
 
 /* The standard echo port number. */
-#define tcphttpPORT_NUMBER		8006
+#define tcphttpPORT_NUMBER		8007
 
 /* If ipconfigUSE_TCP_WIN is 1 then the Tx sockets will use a buffer size set by
 ipconfigTCP_TX_BUFFER_LENGTH, and the Tx window size will be
@@ -139,7 +139,7 @@ static uint16_t usUsedStackSize = 0;
 
 /*-----------------------------------------------------------*/
 
-void vStartSimpleTCPServerTasks( uint16_t usStackSize, UBaseType_t uxPriority )
+void vStartSimpleTCPHttpServerTasks( uint16_t usStackSize, UBaseType_t uxPriority )
 {
 	/* Create the TCP echo server. */
 	xTaskCreate( prvConnectionListeningTask, "ServerListener", usStackSize, NULL, uxPriority + 1, NULL );
