@@ -28,6 +28,11 @@
 #ifndef SIMPLE_UDP_BROADCASTER_H
 #define SIMPLE_BROADCASTER_H
 
+#include <stdbool.h>
+
 void vStartSimpleUDPBroadcasterTask( uint16_t usStackSize, uint32_t ulsPort, UBaseType_t uxPriority );
+
+// Global variable. Very bad practice, but OK for simple LiDAR simulator
+bool running;
 
 #endif /* SIMPLE_BROADCASTER_H */

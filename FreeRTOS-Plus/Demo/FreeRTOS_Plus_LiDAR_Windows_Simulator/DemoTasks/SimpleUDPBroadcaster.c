@@ -47,6 +47,8 @@
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 
+#include "SimpleUDPBroadcaster.h"
+
 #define simpTINY_DELAY	( ( TickType_t ) 2 )
 
 /*
@@ -85,32 +87,35 @@ const TickType_t x150ms = 150UL / portTICK_PERIOD_MS;
 	xDestinationAddress.sin_port = ( uint16_t ) ( ( uint32_t ) pvParameters ) & 0xffffUL;
 	xDestinationAddress.sin_port = FreeRTOS_htons( xDestinationAddress.sin_port );
 
+	/* The count is used to differentiate between different messages sent to
+	the server, and to break out of the do while loop below. */
+	ulCount = 0UL;
+
 	for( ;; )
 	{
-		/* Create the socket. */
-		xClientSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );
-		configASSERT( xClientSocket != FREERTOS_INVALID_SOCKET );
-
-		/* The count is used to differentiate between different messages sent to
-		the server, and to break out of the do while loop below. */
-		ulCount = 0UL;
-
-		do
+		if (running)
 		{
-			/* Create the string that is sent to the server. */
-			sprintf( ( char * ) cString, "Server received (not zero copy): Message number %lu\r\n", ulCount );
+			/* Create the socket. */
+			xClientSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
+			configASSERT(xClientSocket != FREERTOS_INVALID_SOCKET);
 
-			/* Send the string to the socket.  ulFlags is set to 0, so the zero
-			copy option is not selected.  That means the data from cString[] is
-			copied into a network buffer inside FreeRTOS_sendto(), and cString[]
-			can be reused as soon as FreeRTOS_sendto() has returned. */
-			lReturned = FreeRTOS_sendto( xClientSocket, ( void * ) cString, strlen( ( const char * ) cString ), 0, &xDestinationAddress, sizeof( xDestinationAddress ) );
+			do
+			{
+				/* Create the string that is sent to the server. */
+				sprintf((char*)cString, "Real LiDAR Pointcloud packet: Message number %lu\r\n", ulCount);
 
-			ulCount++;
+				/* Send the string to the socket.  ulFlags is set to 0, so the zero
+				copy option is not selected.  That means the data from cString[] is
+				copied into a network buffer inside FreeRTOS_sendto(), and cString[]
+				can be reused as soon as FreeRTOS_sendto() has returned. */
+				lReturned = FreeRTOS_sendto(xClientSocket, (void*)cString, strlen((const char*)cString), 0, &xDestinationAddress, sizeof(xDestinationAddress));
 
-		} while( ( lReturned != FREERTOS_SOCKET_ERROR ) && ( ulCount < ulLoopsPerSocket ) );
+				ulCount++;
 
-		FreeRTOS_closesocket( xClientSocket );
+			} while (running && (lReturned != FREERTOS_SOCKET_ERROR) && (ulCount < ulLoopsPerSocket));
+
+			FreeRTOS_closesocket(xClientSocket);
+		}
 
 		/* A short delay to prevent the messages printed by the server task
 		scrolling off the screen too quickly, and to prevent reduce the network

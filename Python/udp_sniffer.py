@@ -9,7 +9,6 @@ Example usage:
 """
 import argparse
 import socket
-import struct
 
 
 def main():
@@ -32,7 +31,7 @@ def main():
 
     while True:
         message, address = udp_socket.recvfrom(409600)
-        print(message, address)
+        print(message)
 
 
 if __name__ == '__main__':

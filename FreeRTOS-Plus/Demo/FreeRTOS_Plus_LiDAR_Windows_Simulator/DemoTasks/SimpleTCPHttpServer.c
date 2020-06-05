@@ -79,6 +79,7 @@
 /* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
@@ -88,6 +89,8 @@
 /* FreeRTOS+TCP includes. */
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
+
+#include "SimpleUDPBroadcaster.h"
 
 /* Remove the whole file if FreeRTOSIPConfig.h is set to exclude TCP. */
 #if( ipconfigUSE_TCP == 1 )
@@ -237,14 +240,44 @@ uint8_t *pucRxBuffer;
 			/* If data was received, echo it back. */
 			if( lBytes >= 0 )
 			{
-				char pucTxBuffer[1024];
+				char pucTxBuffer[2096];
+				char replyBuffer[1024];
 				lSent = 0;
 				lTotalSent = 0;
+
+				tolower(pucRxBuffer);
+
+				if (strstr(pucRxBuffer, "/mode/get") != NULL)
+				{
+					snprintf(replyBuffer, sizeof(replyBuffer), "{\"status\": \"%s\"} ", running ? "Running": "Idle");
+				}
+				else if (strstr(pucRxBuffer, "/mode/set") != NULL)
+				{
+					if (strstr(pucRxBuffer, "/mode/set/run") != NULL)
+					{
+						running = true;
+						snprintf(replyBuffer, sizeof(replyBuffer), "{\"status\": \"%s\"} ", running ? "Running" : "Idle");
+					}
+					else if (strstr(pucRxBuffer, "/mode/set/idle") != NULL)
+					{
+						running = false;
+						snprintf(replyBuffer, sizeof(replyBuffer), "{\"status\": \"%s\"} ", running ? "Running" : "Idle");
+					}
+					else
+					{
+						strncpy(replyBuffer, "{\"error\": \"Invalid mode\"}", sizeof(replyBuffer));
+					}
+				}
+				else
+				{
+					strncpy(replyBuffer, "{\"error\": \"Invalid command\"}", sizeof(replyBuffer));
+				}
+
 				lBytes = snprintf(pucTxBuffer, sizeof(pucTxBuffer),
 					"HTTP/1.1 200 OK\r\n"
 					"Content-Type: text/html\r\n"
 					"Content-Length: %d\r\n\r\n"
-					"%s", 4, "test"
+					"%s", strnlen(replyBuffer, sizeof(replyBuffer)), replyBuffer
 				);
 
 				/* Call send() until all the data has been sent. */
