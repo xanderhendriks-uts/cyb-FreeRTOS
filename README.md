@@ -1,3 +1,26 @@
+## Cybersecurity assignment
+
+* git pull
+* Build and run the LiDAR executeable in Visual Studio
+* cd Python
+* pip install -r requirements.txt
+* python udp_sniffer.py
+* output will show:
+b'Real LiDAR Pointcloud packet: Message number 1094\r\n'
+b'Real LiDAR Pointcloud packet: Message number 1095\r\n'
+b'Real LiDAR Pointcloud packet: Message number 1096\r\n'
+b'Real LiDAR Pointcloud packet: Message number 1097\r\n'
+b'Real LiDAR Pointcloud packet: Message number 1098\r\n'
+* python udp_attacker.py
+* udp_sniffer.py output will show:
+b'Spoofed LiDAR Pointcloud packet: Message number 0\r\n'
+b'Spoofed LiDAR Pointcloud packet: Message number 1\r\n'
+b'Spoofed LiDAR Pointcloud packet: Message number 2\r\n'
+b'Spoofed LiDAR Pointcloud packet: Message number 3\r\n'
+
+
+## FreeRTOS
+
 ## Getting started
 The easiest way to use FreeRTOS is to start with one of the pre-configured demo application projects (found in the FreeRTOS/Demo directory).  That way you will have the correct FreeRTOS source files included, and the correct include paths configured.  Once a demo application is building and executing you can remove the demo application files, and start to add in your own application source files.  See the [FreeRTOS Kernel Quick Start Guide](https://www.freertos.org/FreeRTOS-quick-start-guide.html) for detailed instructions and other useful links.
 
@@ -13,11 +36,11 @@ Note: If you download the ZIP file provided by GitHub UI, you will not get the c
 
 To clone using HTTPS:
 ```
-git clone https://github.com/FreeRTOS/FreeRTOS.git --recurse-submodules
+git clone https://github.com/xanderhendriks-uts/cyb-FreeRTOS.git --recurse-submodules
 ```
 Using SSH:
 ```
-git clone git@github.com:FreeRTOS/FreeRTOS.git --recurse-submodules
+git clone git@github.com:xanderhendriks-uts/cyb-FreeRTOS.git --recurse-submodules
 ```
 
 If you have downloaded the repo without using the `--recurse-submodules` argument, you need to run:
