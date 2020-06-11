@@ -27,14 +27,14 @@ def main():
 
     # Check the current status of the LiDAR (should be 'running')
     try:
-        response = requests.get('https://%s:8007/mode/get' % ip_address)
+        response = requests.get('http://%s:8007/mode/get' % ip_address)
         print (response.text)
     except:
         print("Can't access LiDAR REST API")
 
     # Put the real LiDAR in idle mode which stops it from transmitting pointcloud packets
     try:
-        response = requests.get('https://%s:8007/mode/set/idle' % ip_address)
+        response = requests.get('http://%s:8007/mode/set/idle' % ip_address)
         print (response.text)
     except:
         print("Can't access LiDAR REST API")

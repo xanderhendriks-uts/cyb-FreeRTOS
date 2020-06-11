@@ -1,10 +1,15 @@
+import hmac
+import hashlib
+import secrets
 import socket
+import ssl
 import time
 import threading
 from flask import Flask
 
 running = False
 udp_port = 5044
+api_secret = secrets.token_hex(20)
 
 app = Flask(__name__)
 
@@ -28,6 +33,20 @@ def mode_set(mode):
 def mode_get():
     return '{"status": "%s"}' % "Running" if running else "Idle"
 
+
+@app.route('/secret/get')
+def secret_get():
+    return '{"secret": "%s"}' % api_secret
+
+
+@app.route('/secret/reset')
+def secret_reset():
+    global api_secret
+
+    api_secret = secrets.token_hex(20)
+    return '{"secret": "%s"}' % api_secret
+
+
 @app.errorhandler(404) 
 def not_found(e): 
     return '{"error": "Invalid command"}'
@@ -46,7 +65,8 @@ def udp_thread_function():
     while True:
         if running:
             message = 'Real LiDAR Pointcloud packet: Message number %d' % count
-            udp_socket.sendto(bytes(message, 'utf-8'), ('<broadcast>', udp_port))
+            signature = hmac.new(bytes(api_secret , 'utf-8'), msg = bytes(message , 'utf-8'), digestmod = hashlib.sha256).hexdigest().upper()
+            udp_socket.sendto(bytes(message + signature, 'utf-8'), ('<broadcast>', udp_port))
 
             count += 1
 
@@ -57,4 +77,8 @@ if __name__ == '__main__':
     udp_thread = threading.Thread(target=udp_thread_function)
     udp_thread.start()
 
-    app.run('0.0.0.0', 8007)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.load_verify_locations('ca-crt.pem')
+    context.load_cert_chain('server.crt', 'server.key')
+    app.run('0.0.0.0', 8007, ssl_context=context)

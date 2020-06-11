@@ -31,7 +31,7 @@ def main():
 
     while True:
         message, address = udp_socket.recvfrom(409600)
-        print(message)
+        print(message.decode('utf-8'))
 
 
 if __name__ == '__main__':

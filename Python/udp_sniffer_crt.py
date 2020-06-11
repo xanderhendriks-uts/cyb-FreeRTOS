@@ -23,10 +23,6 @@ def main():
     parser = argparse.ArgumentParser(description='Sniff for UDP packets on the given port and print them to stdout')
     options = parser.parse_args()
 
-    # Start the LiDAR's transmision of pointcloud packets
-    response = requests.get('https://%s:8007/mode/set/run' % ip_address, verify=False, cert=('client.crt', 'client.key'))
-    print (response.text)
-
     # Get the secret for the pointcloud packet authentication
     response = requests.get('https://%s:8007/secret/get' % ip_address, verify=False, cert=('client.crt', 'client.key'))
     print (response.text)

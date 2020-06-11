@@ -1,22 +1,48 @@
 ## Cybersecurity assignment
 
 * git pull
-* Build and run the LiDAR executeable in Visual Studio
 * cd Python
-* pip install -r requirements.txt
-* python udp_sniffer.py
-* output will show:
-b'Real LiDAR Pointcloud packet: Message number 1094\r\n'
-b'Real LiDAR Pointcloud packet: Message number 1095\r\n'
-b'Real LiDAR Pointcloud packet: Message number 1096\r\n'
-b'Real LiDAR Pointcloud packet: Message number 1097\r\n'
-b'Real LiDAR Pointcloud packet: Message number 1098\r\n'
-* python udp_attacker.py
-* udp_sniffer.py output will show:
-b'Spoofed LiDAR Pointcloud packet: Message number 0\r\n'
-b'Spoofed LiDAR Pointcloud packet: Message number 1\r\n'
-b'Spoofed LiDAR Pointcloud packet: Message number 2\r\n'
-b'Spoofed LiDAR Pointcloud packet: Message number 3\r\n'
+* pip install -r requirements.txt (make sure you have )
+
+### Insecure implementation
+* python lidar.py
+* curl http://localhost:8007/mode/set/run : {"status": "Running"}
+* python udp_sniffer.py :
+Real LiDAR Pointcloud packet: Message number 36
+Real LiDAR Pointcloud packet: Message number 37
+Real LiDAR Pointcloud packet: Message number 38
+* python udp_attacker.py :
+{"status": "Running"}
+Idle
+Broadcasting on: 5044
+* udp_sniffer.py output:
+Real LiDAR Pointcloud packet: Message number 670
+Real LiDAR Pointcloud packet: Message number 671
+Spoofed LiDAR Pointcloud packet: Message number 0
+Spoofed LiDAR Pointcloud packet: Message number 1
+
+### Secure implementation
+* python lidar_crt.py
+* curl --insecure --cacert ca-crt.pem --key client.key --cert client.crt https://localhost:8007/mode/set/run : {"status": "Running"}
+* python udp_sniffer.py (code still works without checking authentication for backwards compatibility):
+Real LiDAR Pointcloud packet: Message number 634516C2DB1EE1050B85545531D764028A0D5C569981FE79CA147B641968BC784C
+Real LiDAR Pointcloud packet: Message number 64347804A450742FAD5E32836D8AE2C1D1BAE45CF1080D76ED30BDEADFEDE0B480
+Real LiDAR Pointcloud packet: Message number 650361F082D4013E3D44437F90DA3E8F7D5B9D626F681BF8F59C7C3B3D30435304
+* python udp_sniffer_crt.py :
+Real LiDAR Pointcloud packet: Message number 632
+Real LiDAR Pointcloud packet: Message number 633
+Real LiDAR Pointcloud packet: Message number 634
+* python udp_attacker.py :
+Can't access LiDAR REST API
+Can't access LiDAR REST API
+Broadcasting on: 5044
+* udp_sniffer_crt.py output (The spoofed packets can be recognised and ignored):
+Real LiDAR Pointcloud packet: Message number 1067
+Authentication failed: Spoofed LiDAR Pointcloud packet: Message number 147
+Real LiDAR Pointcloud packet: Message number 1068
+Authentication failed: Spoofed LiDAR Pointcloud packet: Message number 148
+Real LiDAR Pointcloud packet: Message number 1069
+Authentication failed: Spoofed LiDAR Pointcloud packet: Message number 149
 
 
 ## FreeRTOS
